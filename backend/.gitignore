@@ -1,0 +1,7 @@
+node_modules/
+.env*
+.env.example
+src/uploads/*
+!src/uploads/.gitkeep
+*.log
+/src/config/seed.js
