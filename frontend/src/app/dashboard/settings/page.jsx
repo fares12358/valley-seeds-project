@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
-import { Loader2, Globe, Phone, Mail, MapPin, MessageCircle, Zap, Eye, EyeOff } from "lucide-react";
+import { Loader2, Globe, Phone, Mail, MapPin, MessageCircle, Eye, EyeOff } from "lucide-react";
 import { FaFacebook, FaLinkedin, FaInstagram, FaWhatsapp, FaMeta } from "react-icons/fa6";
 import ImageManager from "@/components/dashboard/ImageManager";
 import SaveBar from "@/components/dashboard/SaveBar";
@@ -75,7 +75,7 @@ export default function SettingsPage() {
     <div className="flex flex-col min-h-full">
       <div className="flex-1 space-y-8">
 
-        {/* Brand */}
+        {/* ── Brand ───────────────────────────────────────────────── */}
         <section className="bg-white rounded-2xl border border-gray-100 p-6 space-y-5">
           <h2 className="text-base font-semibold text-gray-800">Brand Identity</h2>
           <div>
@@ -100,7 +100,7 @@ export default function SettingsPage() {
           </div>
         </section>
 
-        {/* Contact info */}
+        {/* ── Contact info ─────────────────────────────────────────── */}
         <section className="bg-white rounded-2xl border border-gray-100 p-6 space-y-5">
           <h2 className="text-base font-semibold text-gray-800">Contact Information</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -124,7 +124,7 @@ export default function SettingsPage() {
           </div>
         </section>
 
-        {/* Social links */}
+        {/* ── Social links ─────────────────────────────────────────── */}
         <section className="bg-white rounded-2xl border border-gray-100 p-6 space-y-5">
           <h2 className="text-base font-semibold text-gray-800">Social Links</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -143,34 +143,37 @@ export default function SettingsPage() {
           </div>
         </section>
 
-        {/* Logos */}
+        {/* ── Logos ────────────────────────────────────────────────── */}
         <section className="bg-white rounded-2xl border border-gray-100 p-6 space-y-4">
           <h2 className="text-base font-semibold text-gray-800">Logo Images</h2>
+          <p className="text-sm text-gray-400">Upload both versions — used across the navbar, footer, and OG images.</p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <ImageManager
               label="Logo — light background"
+              hint="320 × 80 px · transparent PNG"
               value={settings.logoUrl ? { url: settings.logoUrl, publicId: settings.logoPublicId || "" } : null}
               folder="brand"
               slot="logo"
               onChange={(img) => {
-                set("logoUrl",       img?.url       || "");
-                set("logoPublicId",  img?.publicId  || "");
+                set("logoUrl",      img?.url      || "");
+                set("logoPublicId", img?.publicId || "");
               }}
             />
             <ImageManager
               label="Logo — dark background (white version)"
+              hint="320 × 80 px · transparent PNG · white"
               value={settings.logoWhiteUrl ? { url: settings.logoWhiteUrl, publicId: settings.logoWhitePublicId || "" } : null}
               folder="brand"
               slot="logo-white"
               onChange={(img) => {
-                set("logoWhiteUrl",      img?.url       || "");
-                set("logoWhitePublicId", img?.publicId  || "");
+                set("logoWhiteUrl",      img?.url      || "");
+                set("logoWhitePublicId", img?.publicId || "");
               }}
             />
           </div>
         </section>
 
-        {/* ── Meta Pixel ─────────────────────────────────────────────────── */}
+        {/* ── Meta Pixel ───────────────────────────────────────────── */}
         <section className="bg-white rounded-2xl border border-gray-100 p-6 space-y-5">
           <div className="flex items-start gap-3">
             <div className="w-9 h-9 rounded-xl bg-[#1877F2]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -220,7 +223,6 @@ export default function SettingsPage() {
             </p>
           </div>
 
-          {/* live status indicator */}
           <div className={`flex items-center gap-2.5 px-4 py-3 rounded-xl text-xs font-medium border ${
             settings.metaPixelId?.trim()
               ? "bg-green-50 border-green-200 text-green-700"
@@ -234,11 +236,10 @@ export default function SettingsPage() {
               : "No Pixel ID set — tracking disabled"}
           </div>
 
-          {/* events reference */}
           <div className="grid sm:grid-cols-2 gap-3">
             {[
-              { icon: "🌐", event: "PageView",  when: "Fires when any visitor loads the homepage" },
-              { icon: "📋", event: "Lead",       when: "Fires after a successful contact form submit" },
+              { icon: "🌐", event: "PageView", when: "Fires when any visitor loads the homepage" },
+              { icon: "📋", event: "Lead",     when: "Fires after a successful contact form submit" },
             ].map(({ icon, event, when }) => (
               <div key={event} className="flex items-start gap-3 bg-gray-50 rounded-xl p-3.5">
                 <span className="text-lg leading-none">{icon}</span>
@@ -250,12 +251,11 @@ export default function SettingsPage() {
             ))}
           </div>
         </section>
-        {/* ─────────────────────────────────────────────────────────────── */}
 
-        {/* Email sending config */}
+        {/* ── Email sending config ─────────────────────────────────── */}
         <EmailSettingsSection />
 
-        {/* Admin login credentials */}
+        {/* ── Admin login credentials ──────────────────────────────── */}
         <AdminCredentialsSection />
 
       </div>

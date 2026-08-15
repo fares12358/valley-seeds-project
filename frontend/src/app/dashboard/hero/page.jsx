@@ -29,28 +29,23 @@ export default function HeroEditorPage() {
 
           <section className="bg-white rounded-2xl border border-gray-100 p-6 space-y-5">
             <h2 className="text-base font-semibold text-gray-800">Stats Bar (3 fixed)</h2>
+            <p className="text-xs text-gray-400 -mt-2">
+              The number value is now independent per language — useful when Arabic uses Arabic numerals or different formatting (e.g. <span className="font-mono">+560</span> in EN vs <span className="font-mono">٥٦٠+</span> in AR).
+            </p>
             {(formData.en?.stats || []).map((_, i) => (
               <div key={i} className="border border-gray-100 rounded-xl p-4 space-y-4">
                 <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Stat {i + 1}</span>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Number <span className="text-gray-400 font-normal">(shared)</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.en?.stats?.[i]?.number || ""}
-                    onChange={(e) => {
-                      const enArr = [...(formData.en?.stats || [])];
-                      enArr[i] = { ...enArr[i], number: e.target.value };
-                      setField("en", "stats", enArr);
-                      const arArr = [...(formData.ar?.stats || [])];
-                      arArr[i] = { ...arArr[i], number: e.target.value };
-                      setField("ar", "stats", arArr);
-                    }}
-                    placeholder="e.g. 560+"
-                    className="w-full max-w-xs px-4 py-2.5 bg-gray-50 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#037338] focus:bg-white transition-all"
-                  />
-                </div>
+                <FieldEditor
+                  label="Number"
+                  fieldKey={"stat_" + i + "_number"}
+                  enValue={formData.en?.stats?.[i]?.number}
+                  arValue={formData.ar?.stats?.[i]?.number}
+                  onChange={(lang, val) => {
+                    const arr = [...(formData[lang]?.stats || [])];
+                    arr[i] = { ...arr[i], number: val };
+                    setField(lang, "stats", arr);
+                  }}
+                />
                 <FieldEditor
                   label="Stat Label"
                   fieldKey={"stat_" + i + "_text"}
