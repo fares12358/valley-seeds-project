@@ -3,7 +3,7 @@ sprint/*
 docs
 /docs/*
 audit-system-2026-08-05.txt
-claude.me
-CLADUE.me
+claude.md
+CLADUE.md
 .env.*
 .env

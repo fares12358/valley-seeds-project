@@ -24,7 +24,6 @@ import { authLimiter }        from "./middlewares/rateLimiter.js";
 const app = express();
 
 // ─── Trust proxy — required for correct req.ip behind Railway/Render/Nginx ────
-// Without this, rate limiter sees the proxy IP, not the real client IP
 app.set("trust proxy", 1);
 
 // ─── Security ─────────────────────────────────────────────────────────────────
@@ -51,9 +50,7 @@ app.use(express.json({ limit: "6mb" }));
 app.use(express.urlencoded({ extended: true, limit: "6mb" }));
 app.use(cookieParser());
 
-// ─── CSRF Origin check — lightweight protection for cookie-authenticated mutations
-// sameSite:none (production) removes browser CSRF protection — verify Origin header
-// as a defence-in-depth measure on all state-mutating authenticated routes
+// ─── CSRF Origin check ────────────────────────────────────────────────────────
 const CSRF_SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 const CSRF_PUBLIC_PATHS = [
   "/api/contact",
@@ -70,35 +67,34 @@ app.use((req, res, next) => {
   const origin = req.headers.origin || req.headers.referer;
   if (origin) {
     try {
-      const originHost  = new URL(origin).hostname;
+      const originHost   = new URL(origin).hostname;
       const allowedHosts = allowedOrigins.map((o) => new URL(o).hostname);
       if (!allowedHosts.includes(originHost)) {
         return res.status(403).json({ success: false, message: "Forbidden — invalid origin" });
       }
     } catch {
-      // Malformed origin header — block the request
       return res.status(403).json({ success: false, message: "Forbidden — invalid origin" });
     }
   }
-  // No origin header (Postman, curl, server-to-server) — allow through in dev
   next();
 });
 
-// ─── Auth rate limiting — applied to sensitive auth endpoints only ─────────────
+// ─── Auth rate limiting ────────────────────────────────────────────────────────
 app.use("/api/auth/login",           authLimiter);
 app.use("/api/auth/forgot-password", authLimiter);
 
-// ─── Uploaded images — served locally from disk (replaces Cloudinary) ─────────
-// Cross-Origin-Resource-Policy override: images must be embeddable by the
-// frontend even when it's on a different domain (Vercel + Railway/Render).
-app.use(
-  "/uploads",
-  (req, res, next) => {
-    res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
-    next();
-  },
-  express.static(UPLOADS_ROOT, { maxAge: "7d" })
-);
+// ─── Cross-Origin-Resource-Policy — applied to ALL /uploads/* responses ────────
+// Mounted BEFORE express.static so the header is present on real files AND on
+// any 404/error responses that fall through — this prevents the browser from
+// blocking the request with ERR_BLOCKED_BY_RESPONSE.NotSameOrigin regardless
+// of whether the file is found on disk.
+app.use("/uploads", (req, res, next) => {
+  res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
+  next();
+});
+
+// ─── Static file serving — uploaded images ────────────────────────────────────
+app.use("/uploads", express.static(UPLOADS_ROOT, { maxAge: "7d" }));
 
 // ─── Health check ─────────────────────────────────────────────────────────────
 app.get("/api/health", (req, res) => {
@@ -120,7 +116,7 @@ app.use((req, res) => {
 // ─── Global error handler (must be last) ──────────────────────────────────────
 app.use(errorMiddleware);
 
-// ─── Start — await DB before accepting connections (prevents startup race) ─────
+// ─── Start ────────────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 5000;
 
 (async () => {
