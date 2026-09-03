@@ -103,7 +103,7 @@ const ServicesSection = () => {
   const displayed = values.slice(0, VISIBLE);
 
   return (
-    <section id="services" className="relative py-24 lg:py-32 bg-gradient-to-br from-[#012a14] via-[var(--brand-primary)] to-[#05964a] overflow-hidden">
+    <section id="services" className="relative py-14 sm:py-20 lg:py-32 bg-gradient-to-br from-[#012a14] via-[var(--brand-primary)] to-[#05964a] overflow-hidden">
       <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-[var(--brand-accent)]/5 rounded-full blur-3xl -translate-x-1/3 -translate-y-1/3" />
       <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-white/5 rounded-full blur-3xl translate-x-1/3 translate-y-1/3" />
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[var(--brand-accent)]/30 to-transparent" />

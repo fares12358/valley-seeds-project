@@ -1,5 +1,6 @@
 import Contact from "./contact.model.js";
 import { sendContactEmail } from "../../config/email.js";
+import { notifyContactSubmission } from "../telegram/notification.service.js";
 
 const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || ""));
 
@@ -35,6 +36,14 @@ export const submit = async (req, res, next) => {
       );
     } catch (emailErr) {
       console.warn("[contact] Email init failed:", emailErr.message);
+    }
+
+    try {
+      notifyContactSubmission(contact).catch((err) =>
+        console.warn("[contact] Telegram notify failed:", err.message)
+      );
+    } catch (telegramErr) {
+      console.warn("[contact] Telegram init failed:", telegramErr.message);
     }
 
     res.status(201).json({ success: true, data: null });

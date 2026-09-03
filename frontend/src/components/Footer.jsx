@@ -32,7 +32,7 @@ export default function Footer() {
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
 
   return (
-    <footer className="relative bg-gradient-to-b from-[#012a14] to-[#011a0c] text-white z-50">
+    <footer className="relative bg-gradient-to-b from-[#012a14] to-[#011a0c] text-white z-50 overflow-x-hidden">
       <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[var(--brand-accent)] to-transparent opacity-60" />
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-[var(--brand-accent)]/5 rounded-full blur-3xl -translate-y-1/2" />
 

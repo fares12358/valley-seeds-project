@@ -7,3 +7,5 @@ claude.md
 CLADUE.md
 .env.*
 .env
+node_modules
+TELEGRAM_MODULE_REPORT.md

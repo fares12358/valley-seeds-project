@@ -11,7 +11,7 @@ export default function MissionSection() {
   const m = t.mission;
 
   return (
-    <section id="mission" className="py-24 lg:py-32 bg-linear-to-b from-white via-[#f4faf6] to-white relative overflow-hidden">
+    <section id="mission" className="py-14 sm:py-20 lg:py-32 bg-linear-to-b from-white via-[#f4faf6] to-white relative overflow-hidden">
       <div className="absolute top-0 left-0 w-96 h-96 bg-[var(--brand-accent)]/5 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
       <div className="absolute bottom-0 right-0 w-96 h-96 bg-[var(--brand-primary)]/5 rounded-full blur-3xl translate-x-1/2 translate-y-1/2" />
 

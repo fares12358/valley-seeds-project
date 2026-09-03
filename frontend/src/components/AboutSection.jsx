@@ -14,9 +14,9 @@ const AboutSection = () => {
   const secondaryImg = images[1]?.url || null;
 
   return (
-    <section id="about" className="py-22 px-12 bg-[#f5f2eb]">
+    <section id="about" className="py-14 px-5 sm:px-8 lg:py-22 lg:px-12 bg-[#f5f2eb]">
       <div className="max-w-[1120px] mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-18 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-18 items-center">
           <motion.div
             initial={{ opacity: 0, x: -40 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -42,7 +42,7 @@ const AboutSection = () => {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.7 }}
-            className="relative h-[460px] hidden lg:block"
+            className="relative h-[300px] sm:h-[380px] lg:h-[460px]"
           >
             <motion.div
               whileHover={{ scale: 1.02 }}
@@ -54,7 +54,7 @@ const AboutSection = () => {
                   src={mainImg}
                   alt={a.img_main_alt}
                   fill
-                  sizes="(max-width: 1024px) 0px, 40vw"
+                  sizes="(max-width: 640px) 85vw, (max-width: 1024px) 60vw, 40vw"
                   className="object-cover"
                 />
               ) : (
@@ -75,7 +75,7 @@ const AboutSection = () => {
                   src={secondaryImg}
                   alt={a.img_secondary_alt}
                   fill
-                  sizes="(max-width: 1024px) 0px, 20vw"
+                  sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 20vw"
                   className="object-cover"
                 />
               ) : (

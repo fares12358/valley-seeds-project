@@ -23,7 +23,7 @@ const TechnologySection = () => {
       : "grid-cols-1 md:grid-cols-2";
 
   return (
-    <section id="technology" className="py-22 px-12 bg-[#ede8db]">
+    <section id="technology" className="py-14 px-5 sm:px-8 lg:py-22 lg:px-12 bg-[#ede8db]">
       <div className="max-w-7xl mx-auto">
         <div className="inline-flex items-center gap-2.5 text-[10px] tracking-[0.16em] uppercase text-[var(--brand-primary)] mb-3.5">
           <span className="block w-6 h-px bg-[#c9a84c]" />

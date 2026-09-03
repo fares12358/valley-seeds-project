@@ -36,6 +36,7 @@ export const get = async (req, res, next) => {
     const settings = await Settings.findOne({}).lean();
     const data = { ...(settings || DEFAULTS) };
     delete data.emailConfig;
+    delete data.telegramConfig;
     res.json({ success: true, data });
   } catch (err) {
     next(err);
@@ -131,6 +132,56 @@ export const updateEmailConfig = async (req, res, next) => {
         from:     cfg.from || "",
         to:       cfg.to || "",
         passSet:  Boolean(cfg.pass),
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// ─── GET /api/settings/telegram  (protected) ───────────────────────────────────
+// Returns { tokenSet, chatId } — the decrypted bot token is never sent back to the browser.
+export const getTelegramConfig = async (req, res, next) => {
+  try {
+    const settings = await Settings.findOne({}).lean();
+    const cfg = settings?.telegramConfig || {};
+    res.json({
+      success: true,
+      data: {
+        chatId:   cfg.chatId || "",
+        tokenSet: Boolean(cfg.botTokenEncrypted),
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// ─── PUT /api/settings/telegram  (protected) ───────────────────────────────────
+// `botToken` is optional on update — omit/blank it to keep the currently stored token.
+// `chatId` overwrites whenever the key is present (including "", to allow clearing it).
+export const updateTelegramConfig = async (req, res, next) => {
+  try {
+    const { botToken, chatId } = req.body;
+
+    const payload = {};
+    if (chatId !== undefined) payload["telegramConfig.chatId"] = chatId;
+    if (botToken && botToken.trim()) {
+      payload["telegramConfig.botTokenEncrypted"] = encrypt(botToken.trim());
+    }
+
+    const updated = await Settings.findOneAndUpdate(
+      {},
+      { $set: payload },
+      { new: true, upsert: true, runValidators: false }
+    ).lean();
+
+    const cfg = updated.telegramConfig || {};
+    res.json({
+      success: true,
+      data: {
+        chatId:   cfg.chatId || "",
+        tokenSet: Boolean(cfg.botTokenEncrypted),
       },
     });
   } catch (err) {

@@ -18,6 +18,7 @@ import contentRoutes          from "./modules/content/content.routes.js";
 import settingsRoutes         from "./modules/settings/settings.routes.js";
 import uploadRoutes, { UPLOADS_ROOT } from "./modules/upload/upload.routes.js";
 import contactRoutes          from "./modules/contact/contact.routes.js";
+import telegramRoutes         from "./modules/telegram/telegram.routes.js";
 import errorMiddleware        from "./middlewares/error.middleware.js";
 import { authLimiter }        from "./middlewares/rateLimiter.js";
 
@@ -31,10 +32,10 @@ app.use(helmet());
 
 // ─── CORS ─────────────────────────────────────────────────────────────────────
 const allowedOrigins = [
-  process.env.CLIENT_URL    || "http://localhost:3000",
+  process.env.CLIENT_URL || "http://localhost:3000",
+  "https://www.valley-seeds.com",
   process.env.DASHBOARD_URL || "http://localhost:3000",
 ].filter(Boolean);
-
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
@@ -58,6 +59,7 @@ const CSRF_PUBLIC_PATHS = [
   "/api/auth/forgot-password",
   "/api/auth/reset-password",
   "/api/health",
+  "/api/telegram/webhook", // Telegram's servers send no Origin/Referer header
 ];
 
 app.use((req, res, next) => {
@@ -107,6 +109,7 @@ app.use("/api/content",  contentRoutes);
 app.use("/api/settings", settingsRoutes);
 app.use("/api/upload",   uploadRoutes);
 app.use("/api/contact",  contactRoutes);
+app.use("/api/telegram", telegramRoutes);
 
 // ─── 404 handler ──────────────────────────────────────────────────────────────
 app.use((req, res) => {

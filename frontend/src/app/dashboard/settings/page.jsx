@@ -7,6 +7,7 @@ import { FaFacebook, FaLinkedin, FaInstagram, FaWhatsapp, FaMeta } from "react-i
 import ImageManager from "@/components/dashboard/ImageManager";
 import SaveBar from "@/components/dashboard/SaveBar";
 import EmailSettingsSection from "@/components/dashboard/EmailSettingsSection";
+import TelegramSettingsSection from "@/components/dashboard/TelegramSettingsSection";
 import AdminCredentialsSection from "@/components/dashboard/AdminCredentialsSection";
 import api from "@/services/api";
 
@@ -254,6 +255,9 @@ export default function SettingsPage() {
 
         {/* ── Email sending config ─────────────────────────────────── */}
         <EmailSettingsSection />
+
+        {/* ── Telegram bot notifications ───────────────────────────── */}
+        <TelegramSettingsSection />
 
         {/* ── Admin login credentials ──────────────────────────────── */}
         <AdminCredentialsSection />

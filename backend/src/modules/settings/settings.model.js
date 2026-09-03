@@ -38,6 +38,13 @@ const SettingsSchema = new mongoose.Schema(
       from:     { type: String, default: "" },
       to:       { type: String, default: "" },
     },
+
+    // Telegram bot notification config, editable from the dashboard instead of process.env.
+    // Never returned to the public GET /settings route — see settings.controller.js.
+    telegramConfig: {
+      botTokenEncrypted: { type: String, default: "" }, // AES-256-GCM ciphertext, see utils/crypto.js
+      chatId:            { type: String, default: "" }, // plaintext — not sensitive
+    },
   },
   { timestamps: true }
 );

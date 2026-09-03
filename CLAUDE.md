@@ -3,7 +3,7 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 > **Role:** You are a senior MERN stack engineer on this project.
-> The structure described here reflects the actual filesystem as of 2026-08-05 — always re-verify against the code before assuming, since this file can go stale again.
+> The structure described here reflects the actual filesystem as of 2026-09-02 — always re-verify against the code before assuming, since this file can go stale again.
 
 ---
 
@@ -39,6 +39,7 @@ The dashboard and backend are **fully built**, not "not started" — the project
 | Admin credential change (email/password) from dashboard | ✅ Complete (`PUT /api/auth/credentials`) |
 | Public site uses dashboard brand color/logo (`BrandContext`, CSS vars) | ✅ Complete — was previously wired in `Settings` but never consumed by the frontend |
 | Public site gated behind content fetch (spinner → content, or offline alert card) | ✅ Complete — replaced the old "flash local defaults, silently swap in API content" behavior |
+| Telegram bot notifications on contact-form submit (`Settings.telegramConfig`, `/dashboard/settings`) | ✅ Complete (2026-09-02) — DB-first with `.env` fallback, mirrors the email-config pattern; fires alongside email, fire-and-forget |
 | Automated tests | ❌ None exist (no test runner in either package.json) |
 | Lint script | ❌ Frontend has `next lint`; backend has none |
 | WarrantySection component | ⚠️ Still built but unused/unrendered |
@@ -95,7 +96,7 @@ valley-seed/
 │       │                                ServerOfflineCard — the last two are the content-gating spinner/error states)
 │       │   └── dashboard/            ← Sidebar, TopBar, SectionForm, FieldEditor, ImageManager, ConfirmModal,
 │       │                                SaveBar, SectionSkeleton, StatCard, EmptyState, IconPicker, LangTabs, MessageRow,
-│       │                                EmailSettingsSection, AdminCredentialsSection
+│       │                                EmailSettingsSection, TelegramSettingsSection, AdminCredentialsSection
 │       ├── context/
 │       │   ├── LangContext.jsx       ← public site language/i18n state
 │       │   ├── AuthContext.jsx       ← dashboard JWT/session state
@@ -111,8 +112,9 @@ valley-seed/
         ├── server.js                 ← boot, middleware chain, route mounting
         ├── config/{db.js, email.js, seed.js}
         ├── middlewares/{auth.middleware.js, error.middleware.js, rateLimiter.js}   ← NOTE: "middlewares" plural
-        ├── modules/{auth,content,settings,upload,contact}/    ← each: *.controller.js, *.routes.js, *.model.js
-        │     (upload has no model.js — files aren't their own collection, they attach to Content.images)
+        ├── modules/{auth,content,settings,upload,contact,telegram}/    ← each: *.controller.js, *.routes.js, *.model.js
+        │     (upload and telegram have no model.js — upload files attach to Content.images; telegram's
+        │      config lives in Settings.telegramConfig, not its own collection)
         └── uploads/                  ← Multer disk storage root, served at /uploads
 ```
 
@@ -164,8 +166,18 @@ The public site's brand color and logo now come from the dashboard `Settings` do
 - `provider: "app_password"` assumes Gmail's SMTP (`smtp.gmail.com:587`) unless the doc has an explicit host/port; `"smtp"` requires them.
 - Admin login credentials (email/password) are changed via protected `PUT /api/auth/credentials` (`auth.controller.js`), which requires `currentPassword`, reissues the `vs_token` cookie, and busts the auth middleware's in-memory cache — wired to `AdminCredentialsSection.jsx` on the settings page.
 
+### Telegram bot notifications: dashboard-configurable, DB-first with .env fallback
+`Settings.telegramConfig` (`botTokenEncrypted` [AES-256-GCM via `backend/src/utils/crypto.js`, same key/salt as `emailConfig`], `chatId`) lets the admin wire up a Telegram bot from `/dashboard/settings` instead of editing `.env`. Mirrors the email-config pattern exactly:
+- `telegramConfig` is **never** included in the public `GET /api/settings` response (stripped in `settings.controller.js`) — only `GET/PUT /api/settings/telegram` (both protected) can read/write it, and the token is never sent back to the browser (`tokenSet: true/false` only).
+- `backend/src/modules/telegram/telegram-config.service.js`'s `getTelegramConfig()` resolves `{ botToken, chatId }` — DB (decrypted) first, `TELEGRAM_BOT_TOKEN`/`TELEGRAM_CHAT_ID` env vars as fallback — and never throws; a missing/broken config is a soft "not configured" state, not an exception.
+- `telegram.service.js` is a thin wrapper around the Telegram Bot HTTP API using Node's built-in `fetch` (no axios dependency added). `notification.service.js`'s `notifyContactSubmission()` builds the HTML message (user input escaped locally — `parse_mode: "HTML"` makes unescaped input a markup-injection vector) and sends it.
+- `contact.controller.js`'s `submit()` fires `notifyContactSubmission(...)` fire-and-forget, in parallel with (not blocking, not replacing) the existing `sendContactEmail(...)` call — a Telegram failure is only a `console.warn`, never surfaced to the visitor.
+- `telegram.routes.js` (mounted at `/api/telegram`) exposes: `POST /webhook` (public — Telegram's servers call this; optionally secret-checked via `TELEGRAM_WEBHOOK_SECRET` and the `x-telegram-bot-api-secret-token` header; replies to `/start`/`/id` with the sender's numeric chat ID so the admin can find it without leaving Telegram), `POST /register-webhook` and `GET /webhook-info` (protected, used by the dashboard's "Register Webhook" button), `GET /test` (protected, sends a real test message).
+- `/api/telegram/webhook` is added to `server.js`'s `CSRF_PUBLIC_PATHS` allowlist since Telegram sends no `Origin`/`Referer` header.
+- Frontend: `TelegramSettingsSection.jsx`, alongside `EmailSettingsSection.jsx` on the settings page — same independent fetch/save pattern, not part of the page's shared `SaveBar`.
+
 ### Backend conventions
-- Every route → `{ success: true, data }` or `{ success: false, message }`, enforced consistently across all 5 modules, the 404 handler, and the global error middleware (`middlewares/error.middleware.js`, last in the chain).
+- Every route → `{ success: true, data }` or `{ success: false, message }`, enforced consistently across all modules, the 404 handler, and the global error middleware (`middlewares/error.middleware.js`, last in the chain).
 - Every controller function is manually wrapped in `try { } catch (err) { next(err) }` — there is no `asyncHandler` wrapper utility.
 - CORS origin allowlist = `[CLIENT_URL, DASHBOARD_URL]`, `credentials: true`. A hand-rolled CSRF origin-check middleware (inline in `server.js`, not a separate file) additionally rejects mutating requests whose `Origin`/`Referer` host isn't in that allowlist, as defense-in-depth for the production `sameSite: "none"` cookie setting.
 - `cookieOptions()` (defined in `auth.controller.js`) is the single source of truth for the `vs_token` cookie's `httpOnly`/`secure`/`sameSite`/`maxAge` — see Rule R5 below.
@@ -224,6 +236,13 @@ EMAIL_USER=
 EMAIL_PASS=
 EMAIL_FROM=
 EMAIL_TO=
+
+# Telegram contact-form notifications — fully optional, fallbacks only (see
+# "Telegram bot notifications" above). The dashboard is the primary config path.
+TELEGRAM_BOT_TOKEN=
+TELEGRAM_CHAT_ID=
+TELEGRAM_WEBHOOK_SECRET=
+WEBHOOK_BASE_URL=
 ```
 
 ### `frontend/.env.local`

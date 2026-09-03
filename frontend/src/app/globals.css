@@ -67,6 +67,7 @@ html {
   font-family: 'Alexandria';
   scroll-behavior: smooth;
   min-height: 100%;
+  overflow-x: hidden;
 }
 
 *{
@@ -81,6 +82,14 @@ body {
   font-weight: var(--font-weight-normal);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* Public-site section anchors: keeps the fixed header (~80px) from
+   covering a section's top when the browser jumps to a #hash directly
+   (native anchor navigation, not the header's own JS scroll handler). */
+#hero, #about, #why, #mission, #services, #technology, #contact {
+  scroll-margin-top: 96px;
 }
 
 /* ─── Base typography ─────────────────────────────────────────── */
