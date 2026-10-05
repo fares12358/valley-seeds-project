@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import FieldEditor from "@/components/dashboard/FieldEditor";
 import SectionForm from "@/components/dashboard/SectionForm";
 import SectionSkeleton from "@/components/dashboard/SectionSkeleton";
@@ -86,13 +87,10 @@ export default function ContactEditorPage() {
                 <div key={i} className="border border-gray-100 rounded-xl p-4 space-y-3">
                   <span className="text-xs font-mono bg-gray-100 px-2 py-0.5 rounded text-gray-600">{card.key}</span>
                   <FieldEditor label="Card label" fieldKey={"info_label_"+i} enValue={enInfo[i]?.label} arValue={arInfo[i]?.label} onChange={(lang,val) => updateInfoCard(lang,i,"label",val)} />
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Value & Link <span className="text-gray-400 font-normal">(shared)</span></label>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <input type="text" value={enInfo[i]?.value||""} onChange={(e) => { updateInfoCard("en",i,"value",e.target.value); updateInfoCard("ar",i,"value",e.target.value); }} placeholder="Display value" className="w-full px-4 py-2.5 bg-gray-50 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#037338] focus:bg-white transition-all" />
-                      <input type="text" value={enInfo[i]?.link||""} onChange={(e) => { updateInfoCard("en",i,"link",e.target.value); updateInfoCard("ar",i,"link",e.target.value); }} placeholder="tel:, mailto:, https://..." className="w-full px-4 py-2.5 bg-gray-50 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#037338] focus:bg-white transition-all" />
-                    </div>
-                  </div>
+                  <p className="text-xs text-gray-400">
+                    Value and link are managed in{" "}
+                    <Link href="/dashboard/settings" className="text-[#037338] underline">Settings → Contact Information</Link>.
+                  </p>
                 </div>
               ))}
             </section>

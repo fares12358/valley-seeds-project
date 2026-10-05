@@ -9,24 +9,37 @@ import {
 import Image from "next/image";
 import { useTranslation } from "@/context/LangContext";
 import { useBrand } from "@/context/BrandContext";
+import { buildContactInfo } from "@/utils/contactInfo";
 
+// Labels come from the Footer content; value + link come from Settings (single
+// source for contact info — see utils/contactInfo.js).
 const CONTACT_ICONS = {
-  email:    { icon: FaEnvelope,     href: "mailto:info@valley-seeds.com" },
-  phone:    { icon: FaPhone,        href: "tel:+201287636986" },
-  location: { icon: FaMapMarkerAlt, href: null },
+  email:    FaEnvelope,
+  phone:    FaPhone,
+  location: FaMapMarkerAlt,
 };
 
-const socialLinks = [
-  { icon: FaFacebookF, href: "#",                             label: "Facebook" },
-  { icon: FaLinkedinIn, href: "#",                            label: "LinkedIn" },
-  { icon: FaInstagram, href: "#",                             label: "Instagram" },
-  { icon: FaWhatsapp,  href: "https://wa.me/201287636986",    label: "WhatsApp" },
+// href comes from Settings.socialLinks (dashboard → Settings → Social Links)
+const SOCIAL_ICONS = [
+  { key: "facebook",  icon: FaFacebookF,  label: "Facebook" },
+  { key: "linkedin",  icon: FaLinkedinIn, label: "LinkedIn" },
+  { key: "instagram", icon: FaInstagram,  label: "Instagram" },
+  { key: "whatsapp",  icon: FaWhatsapp,   label: "WhatsApp" },
 ];
 
 export default function Footer() {
   const { t } = useTranslation();
-  const { logoWhiteUrl } = useBrand();
+  const brand = useBrand();
+  const { logoWhiteUrl, brandName, socialLinks: socialSettings } = brand;
+  const contactInfo = buildContactInfo(brand);
   const fo = t.footer;
+  // Footer sits on a dark background → white logo. Precedence: Footer editor's
+  // "dark background" image, then Settings white logo, then the static asset.
+  const footerLogo = fo._images?.[1]?.url || logoWhiteUrl || "/images/logo-white.svg";
+  // Only show networks the admin has actually filled in — no dead "#" links.
+  const socialLinks = SOCIAL_ICONS
+    .map((s) => ({ ...s, href: (socialSettings?.[s.key] || "").trim() }))
+    .filter((s) => s.href);
   const currentYear = new Date().getFullYear();
 
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
@@ -58,7 +71,7 @@ export default function Footer() {
           >
             <div className="flex items-center gap-3 mb-5">
               <div className="relative w-40 h-10 flex items-center justify-center">
-                <Image src={logoWhiteUrl || "/images/logo-white.svg"} alt="Valley Seeds Logo" fill className="object-contain" />
+                <Image src={footerLogo} alt={brandName} fill className="object-contain" />
               </div>
             </div>
             <p className="text-white/60 text-sm leading-relaxed mb-6 max-w-xs">
@@ -71,8 +84,8 @@ export default function Footer() {
                   <motion.a
                     key={social.label}
                     href={social.href}
-                    target={social.href.startsWith("http") ? "_blank" : undefined}
-                    rel={social.href.startsWith("http") ? "noopener noreferrer" : undefined}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     whileHover={{ y: -3, scale: 1.1 }}
                     whileTap={{ scale: 0.95 }}
                     className="w-9 h-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center hover:bg-[var(--brand-accent)]/20 hover:border-[var(--brand-accent)]/30 transition-all duration-300"
@@ -145,8 +158,10 @@ export default function Footer() {
             </h4>
             <ul className="space-y-4">
               {fo.contact_items.map((item) => {
-                const config = CONTACT_ICONS[item.key];
-                const Icon = config.icon;
+                const Icon = CONTACT_ICONS[item.key];
+                const live = contactInfo[item.key];
+                if (!Icon || !live) return null;
+                const href = live.href;
                 const content = (
                   <>
                     <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0 group-hover:bg-[var(--brand-accent)]/15 transition-colors">
@@ -154,14 +169,14 @@ export default function Footer() {
                     </div>
                     <div>
                       <div className="text-[10px] text-white/40 uppercase tracking-wider mb-0.5">{item.label}</div>
-                      <div className="text-sm text-white/70 group-hover:text-[var(--brand-accent)] transition-colors">{item.value}</div>
+                      <div className="text-sm text-white/70 group-hover:text-[var(--brand-accent)] transition-colors">{live.value}</div>
                     </div>
                   </>
                 );
                 return (
                   <li key={item.key}>
-                    {config.href ? (
-                      <a href={config.href} className="flex items-start gap-3 group">{content}</a>
+                    {href ? (
+                      <a href={href} className="flex items-start gap-3 group">{content}</a>
                     ) : (
                       <div className="flex items-start gap-3 group">{content}</div>
                     )}

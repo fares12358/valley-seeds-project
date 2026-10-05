@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import FieldEditor from "@/components/dashboard/FieldEditor";
 import SectionForm from "@/components/dashboard/SectionForm";
 import ImageManager from "@/components/dashboard/ImageManager";
@@ -76,10 +77,10 @@ export default function FooterEditorPage() {
                 <div key={i} className="border border-gray-100 rounded-xl p-4 space-y-3">
                   <span className="text-xs font-mono bg-gray-100 px-2 py-0.5 rounded text-gray-600">{item.key}</span>
                   <FieldEditor label="Label" fieldKey={"footer_contact_label_"+i} enValue={enContact[i]?.label} arValue={arContact[i]?.label} onChange={(lang, val) => updateContactItem(lang, i, "label", val)} />
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Value <span className="text-gray-400 font-normal">(shared)</span></label>
-                    <input type="text" value={enContact[i]?.value||""} onChange={(e) => { updateContactItem("en",i,"value",e.target.value); updateContactItem("ar",i,"value",e.target.value); }} placeholder="e.g. Cairo, Egypt" className="w-full max-w-sm px-4 py-2.5 bg-gray-50 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#037338] focus:bg-white transition-all" />
-                  </div>
+                  <p className="text-xs text-gray-400">
+                    Value is managed in{" "}
+                    <Link href="/dashboard/settings" className="text-[#037338] underline">Settings → Contact Information</Link>.
+                  </p>
                 </div>
               ))}
             </section>

@@ -10,6 +10,7 @@ const DEFAULTS = {
   accentColor:  "#96C422",
   logoUrl:      "",
   logoWhiteUrl: "",
+  socialLinks:  {},
 };
 
 // Fetches Settings (brand colors + logos) from the backend once and applies the

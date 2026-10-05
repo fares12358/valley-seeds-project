@@ -16,7 +16,11 @@ export default function Header() {
   const pathname = usePathname();
   const isHome = pathname === "/";
   const { t, lang, setLang, isRTL } = useTranslation();
-  const { logoUrl, logoWhiteUrl } = useBrand();
+  const { logoUrl, logoWhiteUrl, brandName } = useBrand();
+  // Settings logos win; the Footer editor's two logo uploads are the fallback
+  // (light-background / dark-background), then the static assets.
+  const lightLogo = logoUrl      || t.footer?._images?.[0]?.url || "/images/logo.svg";
+  const darkLogo  = logoWhiteUrl || t.footer?._images?.[1]?.url || "/images/logo-white.svg";
 
   const navItems = [
     { id: "home",       label: t.nav.home,       path: "/", sectionId: null },
@@ -76,8 +80,8 @@ export default function Header() {
             >
               <div className="relative w-40 h-10 flex items-center justify-center">
                 <Image
-                  src={isLight ? (logoUrl || "/images/logo.svg") : (logoWhiteUrl || "/images/logo-white.svg")}
-                  alt="Valley Seeds Logo"
+                  src={isLight ? lightLogo : darkLogo}
+                  alt={brandName}
                   fill
                   className="object-contain"
                   priority

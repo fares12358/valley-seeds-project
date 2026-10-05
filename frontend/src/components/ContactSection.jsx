@@ -8,6 +8,8 @@ import {
   FaWhatsapp, FaArrowRight,
 } from "react-icons/fa";
 import { useTranslation } from "@/context/LangContext";
+import { useBrand } from "@/context/BrandContext";
+import { buildContactInfo } from "@/utils/contactInfo";
 import { submitContact } from "@/services/contact.service";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -43,8 +45,11 @@ export default function ContactSection() {
   const { t, isRTL } = useTranslation();
   const c = t.contact;
   const f = c.form;
+  // Card labels come from the Contact section content; values/links from Settings.
+  const brand = useBrand();
+  const contactInfo = buildContactInfo(brand);
 
-  const [formData,     setFormData]     = useState(EMPTY_FORM);
+  const [formData,    setFormData]     = useState(EMPTY_FORM);
   const [submitted,    setSubmitted]    = useState(false);
   const [isSending,    setIsSending]    = useState(false);
   const [error,        setError]        = useState("");
@@ -261,12 +266,15 @@ export default function ContactSection() {
             className="lg:col-span-2 space-y-6"
           >
             <motion.div variants={containerVariants} initial="hidden" animate={isInView ? "visible" : "hidden"} className="space-y-4">
-              {(c.info || []).map((info) => {
+              {(c.info || []).map((card) => {
+                const live = contactInfo[card.key];
+                if (!live) return null;
+                const info = { ...card, value: live.value, link: live.href };
                 const Icon = INFO_ICONS[info.key] || FaEnvelope;
                 return (
                   <motion.a
                     key={info.key}
-                    href={info.link}
+                    href={info.link || undefined}
                     target={info.link?.startsWith("http") ? "_blank" : undefined}
                     rel={info.link?.startsWith("http") ? "noopener noreferrer" : undefined}
                     variants={itemVariants}
